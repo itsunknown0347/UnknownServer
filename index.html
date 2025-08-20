@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Noob SMP</title>
+<meta name="theme-color" content="#0b0b0b" />
+<style>
+  :root{
+    --bg:#0b0b0b;
+    --panel:#0f0f11;
+    --muted:#bfc3c6;
+    --accent-green:#22ff66;
+    --accent-cyan:#00e5ff;
+    --accent-red:#ff4d6d;
+    --accent-blue:#5aa8ff;
+    --accent-gold:#ffd166;
+    --radius:14px;
+    --glass: rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,#060606 0%, #0c0c0c 100%);
+    color:#fff;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.4;
+  }
+
+  /* Top navigation */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:12px 14px; backdrop-filter: blur(6px);
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-bottom:1px solid rgba(255,255,255,0.03);
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.3px}
+  .brand .logo{
+    width:36px; height:36px; border-radius:8px; display:grid; place-items:center;
+    background: linear-gradient(135deg,#2ecc71,#27ae60); color:#041;
+    font-weight:900; box-shadow:0 6px 18px rgba(0,0,0,.6);
+  }
+  .brand span{font-size:18px; color:var(--accent-cyan)}
+  /* nav links (desktop) */
+  .nav{
+    display:flex; gap:18px; align-items:center;
+  }
+  .nav a{
+    color:#fff; text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:700;
+  }
+  .nav a.active, .nav a:hover{ color:var(--accent-cyan); text-shadow:0 2px 12px rgba(0,229,255,.07) }
+
+  /* hamburger */
+  .hambtn{display:none; background:transparent; border:1px solid rgba(255,255,255,0.04); padding:8px 10px; border-radius:8px; color:#fff; cursor:pointer}
+  .hambtn svg{display:block}
+
+  /* layout */
+  main{max-width:1100px; margin:22px auto; padding:0 16px 36px}
+  section{display:none; padding:8px 0 28px}
+  section.active{display:block}
+
+  h1{font-size:28px; margin:6px 0 12px; color:var(--accent-cyan)}
+  .lead{color:var(--muted); margin-bottom:14px}
+
+  /* card boxes (black interior, colored border & glow) */
+  .grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .card{
+    background:var(--panel);
+    border-radius:12px;
+    padding:18px;
+    border:2px solid transparent;
+    transition:transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .card:hover{ transform:translateY(-6px) }
+
+  /* colored borders */
+  .c-green{border-color: rgba(34,255,102,.18); box-shadow: 0 18px 40px rgba(34,255,102,.06)}
+  .c-cyan{border-color: rgba(0,229,255,.18); box-shadow: 0 18px 40px rgba(0,229,255,.06)}
+  .c-blue{border-color: rgba(90,168,255,.14); box-shadow: 0 18px 40px rgba(90,168,255,.06)}
+  .c-purple{border-color: rgba(168,103,255,.12); box-shadow: 0 18px 40px rgba(168,103,255,.04)}
+  .c-gold{border-color: rgba(255,209,102,.12); box-shadow: 0 18px 40px rgba(255,209,102,.04)}
+  .card:hover.c-green{box-shadow:0 0 36px rgba(34,255,102,.18)}
+  .card:hover.c-cyan{box-shadow:0 0 36px rgba(0,229,255,.18)}
+  .card:hover.c-blue{box-shadow:0 0 36px rgba(90,168,255,.18)}
+  .card:hover.c-purple{box-shadow:0 0 36px rgba(168,103,255,.18)}
+  .card:hover.c-gold{box-shadow:0 0 36px rgba(255,209,102,.18)}
+
+  /* Members table */
+  .table-wrap{
+    margin-top:10px;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow: 0 12px 40px rgba(34,255,102,.06);
+    border: 1px solid rgba(34,255,102,.14);
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:720px; /* allows horizontal scroll on small screens */
+  }
+  thead th{
+    background:var(--accent-green);
+    color:#000;
+    padding:12px 10px;
+    font-weight:800;
+    text-align:center;
+  }
+  tbody td{
+    background:#000;
+    color:#fff;
+    padding:14px 10px;
+    border-top:1px solid rgba(255,255,255,.03);
+    text-align:center;
+  }
+  tbody tr:hover td{ background: rgba(255,255,255,0.02) }
+
+  /* SMP Chat widget wrap */
+  .widget-wrap{max-width:900px; margin:0 auto}
+  iframe.widget{
+    width:100%;
+    height:560px;
+    border:0;
+    border-radius:10px;
+    box-shadow:0 24px 70px rgba(0,0,0,.6);
+    background:#000;
+  }
+
+  /* Applications grid */
+  .apps{display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+  .app{
+    min-width:200px; flex:1 1 200px; text-align:center; padding:18px; border-radius:12px; cursor:pointer;
+  }
+  .app.green{background:linear-gradient(180deg, rgba(34,255,102,.06), rgba(34,255,102,.02)); border:1px solid rgba(34,255,102,.12)}
+  .app.orange{background:linear-gradient(180deg, rgba(255,140,0,.06), rgba(255,140,0,.02)); border:1px solid rgba(255,140,0,.10)}
+  .app.purple{background:linear-gradient(180deg, rgba(168,103,255,.06), rgba(168,103,255,.02)); border:1px solid rgba(168,103,255,.10)}
+  .app strong{display:block; margin-bottom:8px; font-size:18px; color:var(--muted)}
+
+  /* Links */
+  .links{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+  .link-btn{padding:12px 18px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); color:var(--accent-gold); font-weight:800; text-decoration:none}
+
+  /* modal */
+  .modal {
+    position:fixed; inset:0; display:none; place-items:center; z-index:80;
+    background: linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.8));
+  }
+  .modal .panel{
+    background:#0d0d0d; padding:18px; border-radius:10px; max-width:360px; width:92%;
+    box-shadow:0 18px 60px rgba(0,0,0,.6); text-align:center;
+  }
+  .btn{display:inline-block; padding:10px 14px; border-radius:8px; background:var(--accent-cyan); color:#021; font-weight:800; border:none; cursor:pointer}
+
+  /* footer */
+  footer{padding:18px 8px; text-align:center; color:var(--muted); margin-top:30px}
+
+  /* responsive */
+  @media (max-width:880px){
+    .nav{display:none}
+    .hambtn{display:inline-block}
+    .widget-wrap iframe{height:460px}
+    thead th{font-size:14px}
+  }
+  @media (max-width:520px){
+    h1{font-size:22px}
+    .brand span{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+  <!-- topbar -->
+  <div class="topbar" role="navigation" aria-label="Main navigation">
+    <div class="brand"><div class="logo">N</div><span>Noob SMP</span></div>
+
+    <!-- desktop nav -->
+    <div class="nav" aria-hidden="false">
+      <a href="#home" data-target="home" class="navlink active">Home</a>
+      <a href="#members" data-target="members" class="navlink">Members</a>
+      <a href="#smpchat" data-target="smpchat" class="navlink">SMP-Chat</a>
+      <a href="#applications" data-target="applications" class="navlink">Applications</a>
+      <a href="#links" data-target="links" class="navlink">Links</a>
+    </div>
+
+    <!-- hamburger for mobile -->
+    <button class="hambtn" aria-label="Open menu" id="hambtn" onclick="toggleMobile()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+  </div>
+
+  <!-- mobile menu (hidden by default) -->
+  <div id="mobileMenu" style="display:none; background:#0e0e0f; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.02)">
+    <a href="#home" data-target="home" class="navlink-mobile" style="display:block; padding:10px 8px; color:#fff; text-decoration:none; font-weight:700">Home</a>
+    <a href="#members" data-target="members" class="navlink-mobile" style="display:block; padding:10px 8px; color:#fff; text-decoration:none; font-weight:700">Members</a>
+    <a href="#smpchat" data-target="smpchat" class="navlink-mobile" style="display:block; padding:10px 8px; color:#fff; text-decoration:none; font-weight:700">SMP-Chat</a>
+    <a href="#applications" data-target="applications" class="navlink-mobile" style="display:block; padding:10px 8px; color:#fff; text-decoration:none; font-weight:700">Applications</a>
+    <a href="#links" data-target="links" class="navlink-mobile" style="display:block; padding:10px 8px; color:#fff; text-decoration:none; font-weight:700">Links</a>
+  </div>
+
+  <main>
+    <!-- HOME -->
+    <section id="home" class="active">
+      <h1>Welcome to Noob SMP</h1>
+      <p class="lead">A Lifesteal SMP — fight for hearts, team up, raid, and survive. Join the community on Discord.</p>
+
+      <div class="grid" style="margin-top:8px">
+        <div class="card c-cyan">
+          <h3>About Noob SMP</h3>
+          <p style="color:var(--muted)">Noob SMP is a lifesteal survival server where every heart matters. Kill to steal hearts, form clans, participate in events, and climb the leaderboard. Community focused, fair play, fun events.</p>
+          <p style="font-weight:700; margin-top:8px">— Itz_unknown</p>
+        </div>
+
+        <div class="card c-green">
+          <h3>Rules</h3>
+          <ul style="color:var(--muted); text-align:left; margin:12px 0 0 14px; padding:0;">
+            <li>• No hacking/cheats or exploits</li>
+            <li>• Respect other players</li>
+            <li>• No spawn griefing; raiding allowed per rules</li>
+            <li>• No ban evasion, follow staff decisions</li>
+            <li>• Use Discord for appeals & support</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMBERS -->
+    <section id="members">
+      <h1>👥 SMP Members</h1>
+      <p class="lead">Top players & stats (static table — edit manually or ask me to connect live).</p>
+
+      <div class="table-wrap">
+        <div style="overflow:auto">
+          <table aria-label="Members stats table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Kills</th>
+                <th>Deaths</th>
+                <th>KDR</th>
+                <th>Playtime</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ItzUnknown</td>
+                <td>25</td>
+                <td>5</td>
+                <td>5.0</td>
+                <td>12h</td>
+              </tr>
+              <tr>
+                <td>Hydra364</td>
+                <td>15</td>
+                <td>10</td>
+                <td>1.5</td>
+                <td>9h</td>
+              </tr>
+              <tr>
+                <td>Alex</td>
+                <td>5</td>
+                <td>12</td>
+                <td>0.4</td>
+                <td>6h</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SMP-CHAT -->
+    <section id="smpchat">
+      <h1>💬 SMP-Chat (Preview)</h1>
+      <p class="lead">Read-only preview of the server. Join Discord to send messages.</p>
+      <div class="widget-wrap" style="margin-top:12px">
+        <!-- Official Discord Server Widget: requires Server Widget enabled in Discord settings -->
+        <iframe class="widget" src="https://discord.com/widget?id=1403351089776033852&theme=dark" allowtransparency="true"></iframe>
+      </div>
+    </section>
+
+    <!-- APPLICATIONS -->
+    <section id="applications">
+      <h1>📜 Applications</h1>
+      <p class="lead">Choose a role to apply. (Currently under maintenance)</p>
+
+      <div class="apps" style="margin-top:14px">
+        <div class="card app green" onclick="openModal('Player')">
+          <strong>Player</strong>
+          <div style="color:var(--muted)">Join as a regular player</div>
+        </div>
+        <div class="card app orange" onclick="openModal('Admin')">
+          <strong>Admin</strong>
+          <div style="color:var(--muted)">Help moderate the server</div>
+        </div>
+        <div class="card app purple" onclick="openModal('???')">
+          <strong>???</strong>
+          <div style="color:var(--muted)">Secret role — surprise!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LINKS -->
+    <section id="links">
+      <h1>🔗 Links</h1>
+      <p class="lead">Quick connect to our community</p>
+
+      <div style="display:flex; justify-content:center; gap:12px; margin-top:12px; flex-wrap:wrap">
+        <a class="card c-gold" href="https://discord.gg/5T2cEtSBea" target="_blank" style="text-decoration:none; display:inline-block; min-width:220px">
+          <h3 style="margin:0 0 8px">Discord</h3>
+          <div style="color:var(--muted); font-weight:700">NoobSMP (Click to join)</div>
+        </a>
+
+        <a class="card c-blue" href="#" style="text-decoration:none; display:inline-block; min-width:220px">
+          <h3 style="margin:0 0 8px">Support</h3>
+          <div style="color:var(--muted); font-weight:700">Contact / Help (coming soon)</div>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      © Itz_unknown
+    </footer>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="panel">
+      <h3 id="modTitle">Application</h3>
+      <p id="modText" style="color:var(--muted); margin-top:8px">This application is currently under maintenance. Join our Discord for updates.</p>
+      <div style="margin-top:12px">
+        <button class="btn" onclick="closeModal()">Okay</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // handle navigation (both desktop nav and mobile links)
+  function goTo(target){
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(target);
+    if(el) el.classList.add('active');
+    // set nav active class
+    document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('.nav a[data-target="'+target+'"]').forEach(a=>a.classList.add('active'));
+    // close mobile menu if open
+    document.getElementById('mobileMenu') && (document.getElementById('mobileMenu').style.display = 'none');
+    // scroll to top so content is visible (mobile)
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // click handlers for nav links (desktop)
+  document.querySelectorAll('.nav a.navlink').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const t = a.getAttribute('data-target') || a.getAttribute('href').slice(1);
+      goTo(t);
+    });
+  });
+
+  // mobile menu links
+  document.querySelectorAll('.navlink-mobile').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const t = a.getAttribute('data-target') || a.getAttribute('href').slice(1);
+      goTo(t);
+    });
+  });
+
+  // hamburger toggle
+  function toggleMobile(){
+    const m = document.getElementById('mobileMenu');
+    m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // modal behavior for applications
+  function openModal(name){
+    document.getElementById('modTitle').textContent = name + " Application";
+    document.getElementById('modText').textContent = name + " applications are currently under maintenance. Join our Discord for updates.";
+    const modal = document.getElementById('modal');
+    modal.style.display = 'grid';
+    modal.setAttribute('aria-hidden','false');
+  }
+  function closeModal(){
+    const modal = document.getElementById('modal');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden','true');
+  }
+
+  // open 'home' by default
+  goTo('home');
+
+  // accessibility: close modal on Esc
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>
